@@ -63,8 +63,12 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
     // Instantiate Supabase client (for client components) and make update based on input data
     const supabase = createBrowserSupabaseClient();
     const { error } = await supabase
+      .schema("public")
       .from("profiles")
-      .update({ biography: data.bio, display_name: data.username })
+      .update({
+        biography: data.bio,
+        display_name: data.username,
+      })
       .eq("id", profile.id);
 
     // Catch and report errors from Supabase and exit the onSubmit function with an early 'return' if an error occurred.

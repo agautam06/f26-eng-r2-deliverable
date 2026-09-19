@@ -16,12 +16,12 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { createBrowserSupabaseClient } from "@/lib/client-utils";
+import type { Database } from "@/lib/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState, type BaseSyntheticEvent } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import type { Database } from "@/lib/schema";
 type Species = Database["public"]["Tables"]["species"]["Row"];
 
 // We use zod (z) to define a schema for the "Add species" form.
@@ -67,24 +67,19 @@ All form fields should be set to non-undefined default values.
 Read more here: https://legacy.react-hook-form.com/api/useform/
 */
 
-
-export default function EditSpeciesDialog({
-  species,
-}: {
-  species: Species;
-}) {
-    const router = useRouter();
+export default function EditSpeciesDialog({ species }: { species: Species }) {
+  const router = useRouter();
 
   // Control open/closed state of the dialog
   const [open, setOpen] = useState<boolean>(false);
   const defaultValues: FormData = {
-  scientific_name: species.scientific_name,
-  common_name: species.common_name,
-  kingdom: species.kingdom,
-  total_population: species.total_population,
-  image: species.image,
-  description: species.description,
-};
+    scientific_name: species.scientific_name,
+    common_name: species.common_name,
+    kingdom: species.kingdom,
+    total_population: species.total_population,
+    image: species.image,
+    description: species.description,
+  };
 
   // Instantiate form functionality with React Hook Form, passing in the Zod schema (for validation) and default values
   const form = useForm<FormData>({
@@ -97,16 +92,17 @@ export default function EditSpeciesDialog({
     // The `input` prop contains data that has already been processed by zod. We can now use it in a supabase query
     const supabase = createBrowserSupabaseClient();
     const { error } = await supabase
-        .from("species")
-        .update({
-          common_name: input.common_name,
-          description: input.description,
-          kingdom: input.kingdom,
-          scientific_name: input.scientific_name,
-          total_population: input.total_population,
-          image: input.image,
-        })
-        .eq("id", species.id);
+      .schema("public")
+      .from("species")
+      .update({
+        common_name: input.common_name,
+        description: input.description,
+        kingdom: input.kingdom,
+        scientific_name: input.scientific_name,
+        total_population: input.total_population,
+        image: input.image,
+      })
+      .eq("id", species.id);
 
     // Catch and report errors from Supabase and exit the onSubmit function with an early 'return' if an error occurred.
     if (error) {
@@ -136,10 +132,10 @@ export default function EditSpeciesDialog({
     // Refreshing that server component will display the new species from Supabase
     router.refresh();
 
-  return toast({
-    title: "Species updated!",
-    description: `Successfully updated ${input.scientific_name}.`,
-  });
+    return toast({
+      title: "Species updated!",
+      description: `Successfully updated ${input.scientific_name}.`,
+    });
   };
 
   return (
@@ -149,12 +145,10 @@ export default function EditSpeciesDialog({
           Edit
         </Button>
       </DialogTrigger>
-        <DialogContent className="max-h-screen overflow-y-auto sm:max-w-[600px]">
+      <DialogContent className="max-h-screen overflow-y-auto sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Edit Species</DialogTitle>
-          <DialogDescription>
-            Update the information for this species, then save your changes.
-          </DialogDescription>
+          <DialogDescription>Update the information for this species, then save your changes.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={(e: BaseSyntheticEvent) => void form.handleSubmit(onSubmit)(e)}>

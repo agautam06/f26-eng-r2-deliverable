@@ -9,12 +9,16 @@ import { type Database } from "./schema";
 
 export const createServerSupabaseClient = cache(() => {
   const cookieStore = cookies();
-  const supabase = createServerClient<Database>(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
-    cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value;
+  const supabase = createServerClient<Database, "public">(
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
       },
     },
-  });
+  );
   return supabase;
 });

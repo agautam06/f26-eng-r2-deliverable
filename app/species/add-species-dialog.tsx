@@ -90,17 +90,20 @@ export default function AddSpeciesDialog({ userId }: { userId: string }) {
   const onSubmit = async (input: FormData) => {
     // The `input` prop contains data that has already been processed by zod. We can now use it in a supabase query
     const supabase = createBrowserSupabaseClient();
-    const { error } = await supabase.from("species").insert([
-      {
-        author: userId,
-        common_name: input.common_name,
-        description: input.description,
-        kingdom: input.kingdom,
-        scientific_name: input.scientific_name,
-        total_population: input.total_population,
-        image: input.image,
-      },
-    ]);
+    const { error } = await supabase
+      .schema("public")
+      .from("species")
+      .insert([
+        {
+          author: userId,
+          common_name: input.common_name,
+          description: input.description,
+          kingdom: input.kingdom,
+          scientific_name: input.scientific_name,
+          total_population: input.total_population,
+          image: input.image,
+        },
+      ]);
 
     // Catch and report errors from Supabase and exit the onSubmit function with an early 'return' if an error occurred.
     if (error) {
