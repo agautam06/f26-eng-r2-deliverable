@@ -11,6 +11,14 @@ React server components don't track state between rerenders, so leaving the uniq
 can cause errors with matching props and state in child components if the list order changes.
 */
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import type { Database } from "@/lib/schema";
 import Image from "next/image";
 type Species = Database["public"]["Tables"]["species"]["Row"];
@@ -20,14 +28,58 @@ export default function SpeciesCard({ species }: { species: Species }) {
     <div className="m-4 w-72 min-w-72 flex-none rounded border-2 p-3 shadow">
       {species.image && (
         <div className="relative h-40 w-full">
-          <Image src={species.image} alt={species.scientific_name} fill style={{ objectFit: "cover" }} />
+          <Image
+              src={species.image}
+              alt={species.scientific_name}
+              fill
+              className="object-cover"
+          />
         </div>
       )}
       <h3 className="mt-3 text-2xl font-semibold">{species.scientific_name}</h3>
       <h4 className="text-lg font-light italic">{species.common_name}</h4>
       <p>{species.description ? species.description.slice(0, 150).trim() + "..." : ""}</p>
       {/* Replace the button with the detailed view dialog. */}
-      <Button className="mt-3 w-full">Learn More</Button>
+      <Dialog>
+  <DialogTrigger asChild>
+    <Button className="mt-3 w-full">Learn More</Button>
+  </DialogTrigger>
+
+  <DialogContent className="max-w-2xl">
+    <DialogHeader>
+      <DialogTitle>{species.scientific_name}</DialogTitle>
+      <DialogDescription>
+        Detailed information about this species.
+      </DialogDescription>
+    </DialogHeader>
+
+    <div className="space-y-4">
+      <div>
+        <p className="font-semibold">Common name</p>
+        <p>{species.common_name ?? "Not provided"}</p>
+      </div>
+
+      <div>
+        <p className="font-semibold">Total population</p>
+        <p>
+          {species.total_population !== null
+            ? species.total_population.toLocaleString()
+            : "Not provided"}
+        </p>
+      </div>
+
+      <div>
+        <p className="font-semibold">Kingdom</p>
+        <p>{species.kingdom}</p>
+      </div>
+
+      <div>
+        <p className="font-semibold">Description</p>
+        <p>{species.description ?? "No description provided."}</p>
+      </div>
+    </div>
+  </DialogContent>
+</Dialog>
     </div>
   );
 }
